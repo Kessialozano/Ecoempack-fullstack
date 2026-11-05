@@ -1,0 +1,399 @@
+/* ============================================================
+   ECOEMPPACK - ESTILOS PAGINA DE LOGIN
+   ============================================================ */
+
+:root {
+    --primary:       #2D6A4F;
+    --primary-light: #52B788;
+    --primary-dark:  #1B4332;
+    --secondary:     #74C69D;
+    --accent:        #D4A373;
+    --bg:            #F9F3E3;
+    --text:          #2D3A2E;
+    --text-light:    #6B7C6D;
+    --white:         #FFFFFF;
+    --danger:        #E63946;
+    --success:       #2D6A4F;
+    --radius:        16px;
+    --transition:    0.3s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+/* === LAYOUT DE DOS COLUMNAS === */
+.login-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+}
+
+/* === PANEL IZQUIERDO (MARCA) === */
+.login-brand {
+    background: linear-gradient(145deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-light) 100%);
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--white);
+    text-decoration: none;
+    z-index: 1;
+    position: relative;
+}
+
+.logo-icon { font-size: 1.8rem; }
+
+.brand-content {
+    position: relative;
+    z-index: 1;
+}
+
+.brand-content h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 1rem;
+}
+
+.brand-content p {
+    color: rgba(255,255,255,0.8);
+    font-size: 1.05rem;
+    margin-bottom: 2rem;
+    max-width: 380px;
+    line-height: 1.7;
+}
+
+.brand-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.brand-feature {
+    background: rgba(255,255,255,0.12);
+    color: var(--white);
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-left: 3px solid var(--secondary);
+    backdrop-filter: blur(5px);
+}
+
+/* Circulos decorativos */
+.brand-decoration { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+.deco-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.c1 { width: 400px; height: 400px; top: -150px; right: -150px; }
+.c2 { width: 250px; height: 250px; bottom: 100px; left: -80px; background: rgba(255,255,255,0.03); }
+.c3 { width: 150px; height: 150px; bottom: -50px; right: 30%; background: rgba(255,255,255,0.05); }
+
+/* === PANEL DERECHO (FORMULARIO) === */
+.login-form-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 2rem;
+    background: var(--white);
+    position: relative;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 420px;
+}
+
+/* === TABS LOGIN / REGISTRO === */
+.auth-tabs {
+    display: flex;
+    background: rgba(45,106,79,0.06);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 2rem;
+    gap: 4px;
+}
+
+.auth-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 0.65rem;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: var(--text-light);
+    transition: all var(--transition);
+}
+
+.auth-tab.active {
+    background: var(--white);
+    color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* === MENSAJE DE ESTADO === */
+.status-message {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-message.show { display: flex; }
+.status-message.error   { background: rgba(230,57,70,0.1);  color: var(--danger);  border: 1px solid rgba(230,57,70,0.2); }
+.status-message.success { background: rgba(45,106,79,0.08); color: var(--primary); border: 1px solid rgba(45,106,79,0.2); }
+
+/* === FORMULARIOS === */
+.auth-form { display: none; }
+.auth-form.active { display: block; }
+
+.auth-form h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+}
+
+.form-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1.8rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group { margin-bottom: 1.2rem; }
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 1rem;
+    color: var(--text-light);
+    pointer-events: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 0.75rem 0.9rem 0.75rem 2.6rem;
+    border: 2px solid rgba(45,106,79,0.15);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none;
+}
+
+.input-wrapper input:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+}
+
+.input-wrapper input.error { border-color: var(--danger); }
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-light);
+    padding: 2px;
+    transition: color var(--transition);
+}
+
+.toggle-password:hover { color: var(--primary); }
+
+/* Indicador fuerza de contrasena */
+.password-strength {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    height: 4px;
+}
+
+.strength-bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(45,106,79,0.1);
+    transition: background var(--transition);
+}
+
+.strength-bar.weak   { background: #E63946; }
+.strength-bar.medium { background: #F4A261; }
+.strength-bar.strong { background: var(--primary-light); }
+
+.strength-label {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
+/* Opciones del formulario */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    color: var(--text-light);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.checkbox-label a { color: var(--primary); font-weight: 600; }
+
+.forgot-link {
+    font-size: 0.875rem;
+    color: var(--primary);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color var(--transition);
+}
+
+.forgot-link:hover { color: var(--primary-dark); text-decoration: underline; }
+
+/* Boton principal del formulario */
+.btn-submit {
+    width: 100%;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 0.9rem;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-submit:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(45,106,79,0.35);
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Credenciales de demo */
+.demo-credentials {
+    margin-top: 1.5rem;
+    background: rgba(45,106,79,0.06);
+    border-radius: 10px;
+    padding: 1rem;
+    border: 1px dashed rgba(45,106,79,0.2);
+}
+
+.demo-credentials p {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    margin-bottom: 2px;
+}
+
+.demo-credentials p:first-child {
+    color: var(--primary-dark);
+    margin-bottom: 6px;
+}
+
+/* Link volver al inicio */
+.back-home {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.back-home a {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    transition: color var(--transition);
+}
+
+.back-home a:hover { color: var(--primary); }
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .login-page { grid-template-columns: 1fr; }
+    .login-brand { display: none; }
+    .login-form-side { padding: 2rem 1.5rem; min-height: 100vh; }
+    .form-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 400px) {
+    .form-container { padding: 0 0.5rem; }
+    .auth-form h2 { font-size: 1.4rem; }
+}
