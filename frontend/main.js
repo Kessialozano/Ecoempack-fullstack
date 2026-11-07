@@ -3,7 +3,7 @@
    Incluye: navbar scroll, hamburger menu, animaciones
    ============================================================ */
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://ecoempack-fullstack.onrender.com/api';
 
 // ===== NAVBAR: sombra al hacer scroll =====
 window.addEventListener('scroll', function () {
