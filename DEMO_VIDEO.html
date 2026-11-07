@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoEmpack — Demo del Proyecto</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g:   #2D6A4F; --gl:  #52B788; --gd:  #1B4332;
+  --m:   #74C69D; --cr:  #F9F3E3; --br:  #D4A373;
+  --wh:  #fff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0d0d0d;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 16px; gap: 10px;
+  font-family: 'Inter', sans-serif;
+}
+
+.chapter-bar {
+  display: flex; gap: 6px; align-items: center;
+}
+.chap {
+  height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.15);
+  cursor: pointer; transition: background .2s;
+}
+.chap.done    { background: var(--gl); }
+.chap.current { background: #fff; }
+
+.wrap {
+  width: 100%; max-width: 940px;
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,.7);
+}
+
+/* Browser chrome */
+.chrome {
+  background: #272727; padding: 9px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.dots { display: flex; gap: 5px; }
+.dot  { width: 11px; height: 11px; border-radius: 50%; }
+.dr { background: #FF5F57; } .dy { background: #FEBC2E; } .dg { background: #28C840; }
+.urlbar {
+  flex: 1; background: #3a3a3a; border-radius: 5px;
+  padding: 4px 10px; font-size: 11px; color: #aaa;
+  font-family: monospace; white-space: nowrap; overflow: hidden;
+}
+
+/* Stage */
+.stage {
+  position: relative; width: 100%; aspect-ratio: 16/9;
+  overflow: hidden; background: var(--cr);
+}
+
+/* Scenes */
+.scene {
+  position: absolute; inset: 0;
+  opacity: 0; transition: opacity .5s ease;
+  pointer-events: none; overflow: hidden;
+}
+.scene.active { opacity: 1; pointer-events: auto; }
+
+/* Cursor */
+.cursor {
+  position: absolute; width: 20px; height: 20px;
+  background: rgba(255,255,255,.85);
+  border: 2px solid #333; border-radius: 50%;
+  pointer-events: none; z-index: 900;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  transition: top .6s cubic-bezier(.4,0,.2,1), left .6s cubic-bezier(.4,0,.2,1);
+  display: none;
+}
+.cursor.visible { display: block; }
+.cursor.clicking { background: rgba(230,57,70,.8); transform: scale(0.7); }
+
+/* Callouts */
+.callout {
+  position: absolute; z-index: 800;
+  background: #fff; border-radius: 10px;
+  padding: 8px 12px; font-size: 11.5px; font-weight: 600;
+  color: #1B4332; line-height: 1.4; max-width: 200px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.25);
+  border-left: 3px solid var(--gl);
+  opacity: 0; animation: callIn .35s ease forwards;
+  pointer-events: none;
+}
+.callout.warn { border-left-color: #F4A261; color: #6b3a00; }
+.callout.red  { border-left-color: #E63946; color: #7a0010; }
+.callout.fade-out { animation: callOut .3s ease forwards; }
+
+@keyframes callIn  { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes callOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(-6px); } }
+
+/* Highlight boxes */
+.hbox {
+  position: absolute; z-index: 700;
+  border: 2.5px solid #F4A261; border-radius: 8px;
+  animation: pulse 1.6s ease infinite;
+  pointer-events: none;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(244,162,97,.5); }
+  50%      { box-shadow: 0 0 0 10px rgba(244,162,97,0); }
+}
+
+.arrow-line {
+  position: absolute; z-index: 750;
+  border-left: 2px dashed rgba(244,162,97,.9);
+  pointer-events: none;
+  opacity: 0; animation: callIn .4s .2s ease forwards;
+}
+
+/* ===================== SCENE 0 — INTRO ===================== */
+.s-intro {
+  background: linear-gradient(145deg, #0a1a10, var(--gd), var(--g));
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  gap: 12px; text-align: center;
+}
+.s-intro .logo-big { font-size: 4rem; }
+.s-intro h1 { font-family: 'Poppins',sans-serif; font-size: 2.4rem; font-weight: 800; color: #fff; }
+.s-intro p  { color: rgba(255,255,255,.7); font-size: 1rem; }
+.tech-chips { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+.tc {
+  background: rgba(255,255,255,.12); color: #fff;
+  padding: 4px 14px; border-radius: 50px; font-size: .85rem; font-weight: 600;
+  border: 1px solid rgba(255,255,255,.2);
+}
+
+/* ===================== SCENE 1 — HERO ===================== */
+.s-hero { background: var(--cr); }
+
+.mini-nav {
+  background: rgba(249,243,227,.95); border-bottom: 1px solid rgba(45,106,79,.1);
+  padding: 0 20px; height: 36px; display: flex; align-items: center;
+  justify-content: space-between; position: relative; z-index: 10;
+}
+.mini-logo { font-family: 'Poppins',sans-serif; font-weight: 700; font-size: .9rem; color: var(--g); }
+.mini-logo span { font-size: 1rem; }
+.mini-links { display: flex; gap: 14px; align-items: center; }
+.mini-links a { font-size: .75rem; font-weight: 500; color: #444; }
+.mini-links .btn-n {
+  background: var(--g); color: #fff; padding: 3px 10px;
+  border-radius: 50px; font-size: .72rem; font-weight: 600;
+}
+
+.hero-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  padding: 20px 28px; gap: 20px; align-items: center;
+  height: calc(100% - 36px);
+}
+.hero-badge {
+  display: inline-block; background: rgba(45,106,79,.1); color: var(--g);
+  padding: 3px 10px; border-radius: 50px; font-size: .72rem; font-weight: 600;
+  border: 1px solid rgba(45,106,79,.2); margin-bottom: 10px;
+}
+.hero-h1 {
+  font-family: 'Poppins',sans-serif; font-size: 1.55rem; font-weight: 800;
+  color: var(--gd); line-height: 1.2; margin-bottom: 10px;
+}
+.hero-h1 span { color: var(--g); }
+.hero-desc { font-size: .75rem; color: #6B7C6D; margin-bottom: 14px; line-height: 1.6; max-width: 300px; }
+.hero-btns { display: flex; gap: 8px; margin-bottom: 14px; }
+.btn-p {
+  background: var(--g); color: #fff; padding: 6px 14px;
+  border-radius: 50px; font-size: .75rem; font-weight: 600;
+}
+.btn-s {
+  border: 2px solid var(--g); color: var(--g); padding: 6px 14px;
+  border-radius: 50px; font-size: .75rem; font-weight: 600;
+}
+.hero-stats { display: flex; gap: 20px; }
+.stat strong { display: block; font-family: 'Poppins',sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--g); }
+.stat span { font-size: .68rem; color: #6B7C6D; }
+
+.eco-visual {
+  display: flex; align-items: center; justify-content: center;
+  position: relative; height: 100%;
+}
+.eco-c {
+  width: 140px; height: 140px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gl), var(--g));
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; color: #fff; box-shadow: 0 8px 30px rgba(45,106,79,.3);
+  animation: floatC 4s ease-in-out infinite;
+}
+.eco-c .big { font-size: 2.5rem; }
+.eco-c small { font-family: 'Poppins',sans-serif; font-weight: 700; font-size: .7rem; }
+.fc {
+  position: absolute; background: #fff; padding: 5px 9px;
+  border-radius: 8px; font-size: .68rem; font-weight: 600; color: var(--gd);
+  box-shadow: 0 2px 10px rgba(0,0,0,.1); animation: floatC 3s ease-in-out infinite;
+}
+.fc1 { top: 10%; left: 5%; animation-delay: 0s; }
+.fc2 { bottom: 20%; right: 2%; animation-delay: .8s; }
+.fc3 { bottom: 5%; left: 12%; animation-delay: 1.6s; }
+@keyframes floatC { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+/* ===================== SCENE 2 — PRODUCTS ===================== */
+.s-products { background: var(--cr); overflow: hidden; }
+.sec-header { text-align: center; padding: 14px 20px 10px; }
+.sec-badge {
+  display: inline-block; background: rgba(45,106,79,.1); color: var(--g);
+  padding: 2px 10px; border-radius: 50px; font-size: .68rem; font-weight: 600;
+  border: 1px solid rgba(45,106,79,.2); margin-bottom: 6px;
+}
+.sec-h2 { font-family: 'Poppins',sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--gd); }
+.sec-h2 span { color: var(--g); }
+
+.prod-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; padding: 0 16px 10px;
+}
+.pcard {
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(45,106,79,.1);
+  overflow: hidden; transition: transform .2s;
+}
+.pcard:hover { transform: translateY(-3px); }
+.pimg {
+  height: 65px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; position: relative;
+}
+.pbadge {
+  position: absolute; top: 4px; right: 4px;
+  background: rgba(255,255,255,.9); color: var(--g);
+  font-size: .55rem; font-weight: 700; padding: 2px 6px; border-radius: 50px;
+}
+.pinfo { padding: 8px 10px; }
+.pinfo h4 { font-size: .7rem; font-weight: 700; color: var(--gd); margin-bottom: 2px; }
+.pinfo p  { font-size: .62rem; color: #6B7C6D; margin-bottom: 5px; line-height: 1.4; }
+.pbtn {
+  display: block; width: 100%; background: var(--g); color: #fff;
+  border: none; padding: 4px; border-radius: 6px;
+  font-size: .62rem; font-weight: 600; cursor: pointer; text-align: center;
+}
+
+/* ===================== SCENE 3 — MODAL ===================== */
+.s-modal {
+  background: var(--cr);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-bg {
+  background: rgba(0,0,0,.6); position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.mini-modal {
+  background: #fff; border-radius: 16px; width: 76%; max-width: 520px;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  animation: modalIn .4s ease;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(.9) translateY(14px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.modal-head {
+  padding: 18px 20px 14px; color: #fff; text-align: center;
+  background: linear-gradient(135deg, #D4A373, #8B6914);
+}
+.modal-head .me { font-size: 2rem; margin-bottom: 6px; }
+.modal-head h3 { font-family: 'Poppins',sans-serif; font-size: 1rem; font-weight: 700; }
+.modal-head p  { font-size: .72rem; opacity: .9; }
+.modal-tabs { display: flex; padding: 8px 12px 0; gap: 4px; border-bottom: 2px solid rgba(45,106,79,.1); }
+.mtab {
+  padding: 5px 12px; border-radius: 6px 6px 0 0; font-size: .72rem; font-weight: 600;
+  cursor: pointer; color: #6B7C6D; position: relative; bottom: -2px;
+}
+.mtab.active { color: var(--g); background: rgba(45,106,79,.08); border-bottom: 2px solid var(--g); }
+.modal-body { padding: 14px 16px; }
+
+.catalog-mini-grid {
+  display: grid; grid-template-columns: repeat(2,1fr); gap: 6px; margin-bottom: 10px;
+}
+.ci {
+  background: rgba(45,106,79,.06); border-radius: 6px;
+  padding: 7px; text-align: center; border: 1px solid rgba(45,106,79,.1);
+}
+.ci .sz { font-size: .62rem; font-weight: 700; color: var(--gd); }
+.ci .pr { font-size: .85rem; font-weight: 700; color: var(--g); }
+.ci .mn { font-size: .58rem; color: #888; }
+
+.uso-steps-mini { display: flex; flex-direction: column; gap: 6px; }
+.us {
+  display: flex; gap: 8px; align-items: flex-start;
+  background: rgba(45,106,79,.05); border-radius: 6px; padding: 7px;
+  border-left: 2px solid var(--gl);
+}
+.us .ico  { font-size: .9rem; flex-shrink: 0; }
+.us h5 { font-size: .68rem; font-weight: 700; color: var(--gd); }
+.us p  { font-size: .6rem; color: #6B7C6D; }
+
+/* ===================== SCENE 4 — DETOX ===================== */
+.s-detox { background: linear-gradient(135deg, var(--gd), var(--g)); }
+.detox-inner { padding: 16px 20px; }
+.sec-h2-light { font-family: 'Poppins',sans-serif; font-size: 1.15rem; font-weight: 700; color: #fff; text-align: center; margin-bottom: 4px; }
+.sec-h2-light span { color: var(--m); }
+.sec-sub-light { text-align: center; font-size: .72rem; color: rgba(255,255,255,.75); margin-bottom: 14px; }
+.detox-cards-mini { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+.dc {
+  background: rgba(255,255,255,.1); border-radius: 10px;
+  padding: 12px; border: 1px solid rgba(255,255,255,.15);
+}
+.dc .di { font-size: 1.4rem; margin-bottom: 5px; }
+.dc h4  { font-size: .72rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.dc p   { font-size: .62rem; color: rgba(255,255,255,.8); line-height: 1.5; }
+.dc ul  { padding-left: 10px; margin-top: 4px; }
+.dc li  { font-size: .6rem; color: rgba(255,255,255,.8); margin-bottom: 2px; }
+.dc li::marker { color: var(--m); }
+
+.bars-wrap { background: rgba(255,255,255,.08); border-radius: 10px; padding: 12px 16px; }
+.bars-wrap h4 { font-size: .75rem; font-weight: 700; color: #fff; margin-bottom: 8px; text-align: center; }
+.bar-row { display: grid; grid-template-columns: 20px 140px 1fr 32px; align-items: center; gap: 6px; margin-bottom: 5px; }
+.bar-row .bi   { font-size: .8rem; text-align: center; }
+.bar-row .bn   { font-size: .62rem; color: rgba(255,255,255,.9); }
+.bar-row .bt   { background: rgba(255,255,255,.15); border-radius: 50px; height: 6px; overflow: hidden; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--m), var(--gl)); border-radius: 50px; }
+.bar-row .bp   { font-size: .65rem; font-weight: 700; color: var(--m); }
+
+/* ===================== SCENE 5 — LOGIN ===================== */
+.s-login { background: #fff; display: grid; grid-template-columns: 1fr 1fr; }
+.login-brand-mini {
+  background: linear-gradient(145deg, var(--gd), var(--g), var(--gl));
+  padding: 24px 20px; display: flex; flex-direction: column;
+  justify-content: space-between; position: relative; overflow: hidden;
+}
+.lb-logo { font-family: 'Poppins',sans-serif; font-weight: 700; font-size: 1rem; color: #fff; display: flex; align-items: center; gap: 5px; }
+.lb-content h3 { font-family: 'Poppins',sans-serif; font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.lb-content p  { font-size: .7rem; color: rgba(255,255,255,.8); margin-bottom: 10px; line-height: 1.5; }
+.lb-feat { font-size: .68rem; color: #fff; padding: 5px 10px; background: rgba(255,255,255,.12); border-radius: 6px; margin-bottom: 5px; border-left: 2px solid var(--m); }
+.deco-c { position: absolute; border-radius: 50%; border: 1px solid rgba(255,255,255,.08); }
+.deco-c.c1 { width: 160px; height: 160px; top: -60px; right: -50px; }
+.deco-c.c2 { width: 100px; height: 100px; bottom: 20px; left: -30px; background: rgba(255,255,255,.03); }
+
+.login-form-mini {
+  padding: 18px 20px; display: flex; flex-direction: column;
+  justify-content: center; gap: 12px;
+}
+.auth-tabs-mini { display: flex; background: rgba(45,106,79,.06); border-radius: 8px; padding: 3px; gap: 3px; }
+.at { flex: 1; padding: 5px; text-align: center; border-radius: 6px; font-size: .68rem; font-weight: 600; cursor: pointer; color: #888; }
+.at.active { background: #fff; color: var(--g); box-shadow: 0 1px 5px rgba(0,0,0,.1); }
+.form-title { font-family: 'Poppins',sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--gd); }
+.form-sub   { font-size: .68rem; color: #888; }
+.fgroup { display: flex; flex-direction: column; gap: 3px; }
+.fgroup label { font-size: .7rem; font-weight: 600; color: #444; }
+.finput {
+  border: 1.5px solid rgba(45,106,79,.2); border-radius: 8px;
+  padding: 6px 10px 6px 28px; font-size: .78rem; color: #333; outline: none;
+  width: 100%; font-family: inherit; background: #fff;
+}
+.finput:focus { border-color: var(--gl); box-shadow: 0 0 0 3px rgba(45,106,79,.1); }
+.input-w { position: relative; }
+.input-w .ii { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: .85rem; color: #999; }
+.btn-sub {
+  background: var(--g); color: #fff; border: none; width: 100%;
+  padding: 8px; border-radius: 8px; font-weight: 600; font-size: .8rem;
+  cursor: pointer; font-family: inherit;
+}
+
+/* ===================== SCENE 6 — BACKEND TERMINAL ===================== */
+.s-backend { background: #0d1117; padding: 14px 18px; }
+.term-title { color: #58a6ff; font-family: monospace; font-size: .75rem; margin-bottom: 8px; font-weight: 700; }
+.term {
+  background: #161b22; border-radius: 8px; padding: 14px 16px;
+  font-family: 'Consolas', monospace; font-size: .72rem;
+  border: 1px solid #30363d; margin-bottom: 10px;
+}
+.tline { margin-bottom: 4px; line-height: 1.7; }
+.tp  { color: #79c0ff; }  /* prompt */
+.tc2 { color: #7ee787; }  /* green output */
+.tg  { color: #a5d6ff; }  /* blue */
+.tw  { color: #fff;    }  /* white */
+.ty  { color: #e3b341; }  /* yellow */
+.tm  { color: #f78166; }  /* red/orange */
+.tg2 { color: #56d364; }  /* bright green */
+
+.struct-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.struct-box {
+  background: #161b22; border-radius: 8px; padding: 12px 14px;
+  border: 1px solid #30363d;
+}
+.struct-box h5 { color: #79c0ff; font-size: .7rem; font-weight: 700; margin-bottom: 6px; font-family: monospace; }
+.struct-box .sl { color: #7ee787; font-family: monospace; font-size: .65rem; line-height: 1.8; }
+.struct-box .sl .dir  { color: #a5d6ff; }
+.struct-box .sl .file { color: #e3b341; }
+
+/* ===================== SCENE 7 — CRUD API ===================== */
+.s-crud { background: #0d1117; display: grid; grid-template-columns: 1fr 1.3fr; gap: 0; }
+.req-panel  { background: #161b22; border-right: 1px solid #30363d; padding: 12px; }
+.res-panel  { background: #0d1117; padding: 12px; }
+.panel-title { font-family: monospace; font-size: .7rem; color: #79c0ff; font-weight: 700; margin-bottom: 8px; }
+.crud-op {
+  display: flex; align-items: center; gap: 6px;
+  background: #0d1117; border: 1px solid #30363d;
+  border-radius: 6px; padding: 5px 8px; margin-bottom: 6px;
+  cursor: pointer; transition: border-color .2s;
+}
+.crud-op.active { border-color: #58a6ff; background: rgba(88,166,255,.05); }
+.crud-op:hover  { border-color: #7ee787; }
+.method-badge {
+  font-family: monospace; font-size: .6rem; font-weight: 700;
+  padding: 2px 6px; border-radius: 4px; color: #fff;
+}
+.GET    { background: #2D6A4F; }
+.POST   { background: #1D4E6F; }
+.PUT    { background: #B5781C; }
+.DELETE { background: #E63946; }
+.ep-url { font-family: monospace; font-size: .65rem; color: #e3b341; flex: 1; }
+.ep-lock { font-size: .7rem; }
+
+.res-code {
+  font-family: monospace; font-size: .65rem; background: #161b22;
+  border-radius: 6px; padding: 10px; border: 1px solid #30363d;
+  line-height: 1.7; color: #7ee787; max-height: 290px; overflow-y: auto;
+}
+.rk  { color: #79c0ff; }  /* key */
+.rs  { color: #a5d6ff; }  /* string value */
+.rn  { color: #f78166; }  /* number */
+.rb  { color: #e3b341; }  /* bool */
+.jc  { color: #8b949e; }  /* comment */
+
+.req-detail { margin-top: 8px; }
+.req-label { font-size: .62rem; color: #8b949e; font-family: monospace; margin-bottom: 3px; }
+.req-val {
+  background: #0d1117; border-radius: 5px; padding: 6px 8px;
+  font-family: monospace; font-size: .62rem; color: #e3b341;
+  border: 1px solid #30363d; line-height: 1.6; margin-bottom: 6px;
+}
+
+/* ===================== SCENE 8 — OUTRO ===================== */
+.s-outro {
+  background: linear-gradient(145deg, #0a1a10, var(--gd), var(--g));
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 14px; text-align: center; padding: 24px;
+}
+.outro-icon { font-size: 3rem; }
+.outro h2 { font-family: 'Poppins',sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; }
+.outro p  { font-size: .85rem; color: rgba(255,255,255,.75); max-width: 480px; line-height: 1.6; }
+.arch-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.arch-box {
+  background: rgba(255,255,255,.12); color: #fff; padding: 6px 14px;
+  border-radius: 8px; font-size: .78rem; font-weight: 600;
+  border: 1px solid rgba(255,255,255,.2);
+}
+.arch-arr { color: var(--m); font-size: 1.1rem; }
+.outro-stack { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+.os { background: rgba(255,255,255,.1); color: var(--m); padding: 3px 10px; border-radius: 50px; font-size: .72rem; font-weight: 600; }
+
+/* ===================== VIDEO CONTROLS ===================== */
+.controls {
+  background: #1a1a1a; width: 100%; max-width: 940px;
+  border-radius: 0 0 12px 12px; padding: 8px 16px 10px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.progress-row { display: flex; align-items: center; gap: 10px; }
+.progress-bar {
+  flex: 1; height: 4px; background: #333; border-radius: 2px;
+  cursor: pointer; position: relative; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--gl), var(--m));
+  border-radius: 2px; transition: width .5s linear; width: 0%;
+}
+.time-display { font-size: .7rem; color: #aaa; font-family: monospace; white-space: nowrap; }
+
+.ctrl-row { display: flex; align-items: center; gap: 8px; }
+.ctrl-btn {
+  background: rgba(255,255,255,.08); border: none; color: #fff;
+  width: 30px; height: 30px; border-radius: 6px; cursor: pointer;
+  font-size: .85rem; display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+.ctrl-btn:hover { background: rgba(255,255,255,.15); }
+.ctrl-btn.play-btn { background: var(--g); width: 34px; height: 34px; border-radius: 50%; }
+.scene-label { font-size: .72rem; color: #aaa; margin-left: 6px; }
+.scene-dots { display: flex; gap: 4px; margin-left: auto; }
+.sdot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,.2); cursor: pointer; transition: background .2s;
+}
+.sdot.active { background: var(--m); }
+</style>
+</head>
+<body>
+
+<!-- Chapter indicators -->
+<div class="chapter-bar" id="chapBar">
+  <span style="color:#555; font-size:.65rem; font-family:monospace;">DEMO</span>
+</div>
+
+<div class="wrap">
+  <!-- Browser chrome -->
+  <div class="chrome">
+    <div class="dots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div>
+    <div class="urlbar" id="urlBar">localhost:5500/frontend/index.html</div>
+  </div>
+
+  <!-- Stage -->
+  <div class="stage" id="stage">
+
+    <!-- CURSOR -->
+    <div class="cursor" id="cursor"></div>
+
+    <!-- SCENE 0: INTRO -->
+    <div class="scene s-intro active" id="sc0">
+      <div class="logo-big">🌿</div>
+      <h1>EcoEmpack</h1>
+      <p>Demo del Proyecto — Aplicaci&oacute;n Web Full Stack</p>
+      <div class="tech-chips">
+        <span class="tc">Node.js</span><span class="tc">Express.js</span>
+        <span class="tc">MongoDB</span><span class="tc">JWT</span>
+        <span class="tc">HTML/CSS/JS</span>
+      </div>
+      <p style="color:rgba(255,255,255,.4); font-size:.7rem; margin-top:8px;">Demostraci&oacute;n autom&aacute;tica — Fase 1</p>
+    </div>
+
+    <!-- SCENE 1: HERO -->
+    <div class="scene s-hero" id="sc1">
+      <div class="mini-nav">
+        <div class="mini-logo"><span>🌿</span> EcoEmpack</div>
+        <div class="mini-links">
+          <a href="#">Inicio</a><a href="#">Productos</a><a href="#">Detox</a><a href="#">Nosotros</a>
+          <a href="#" class="btn-n">Iniciar Sesi&oacute;n</a>
+        </div>
+      </div>
+      <div class="hero-grid">
+        <div>
+          <div class="hero-badge">🌍 Comprometidos con el planeta</div>
+          <div class="hero-h1">Empaques <span>Ecol&oacute;gicos</span><br>para Proteger tu Salud</div>
+          <p class="hero-desc">Lib&eacute;rate del pl&aacute;stico. Prot&eacute;gete de los micropl&aacute;sticos. Un&eacute;te al movimiento ecol&oacute;gico.</p>
+          <div class="hero-btns">
+            <span class="btn-p">Ver Cat&aacute;logo</span>
+            <span class="btn-s">Detox Eco</span>
+          </div>
+          <div class="hero-stats">
+            <div class="stat"><strong>500+</strong><span>Productos Eco</span></div>
+            <div class="stat"><strong>10K+</strong><span>Familias</span></div>
+            <div class="stat"><strong>98%</strong><span>Biodegradable</span></div>
+          </div>
+        </div>
+        <div class="eco-visual">
+          <div class="eco-c"><div class="big">🌿</div><small>Eco Friendly</small></div>
+          <div class="fc fc1">🌱 100% Biodegradable</div>
+          <div class="fc fc2">♻️ Reciclable</div>
+          <div class="fc fc3">🚫 Sin Micropl&aacute;sticos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 2: PRODUCTS -->
+    <div class="scene s-products" id="sc2">
+      <div class="mini-nav">
+        <div class="mini-logo"><span>🌿</span> EcoEmpack</div>
+        <div class="mini-links"><a href="#" class="btn-n">Iniciar Sesi&oacute;n</a></div>
+      </div>
+      <div class="sec-header">
+        <div class="sec-badge">Nuestros Productos</div>
+        <div class="sec-h2">Cat&aacute;logo de <span>Empaques Ecol&oacute;gicos</span></div>
+      </div>
+      <div class="prod-grid">
+        <div class="pcard">
+          <div class="pimg" style="background:linear-gradient(135deg,#D4A373,#8B6914)">🛍️<span class="pbadge">M&aacute;s Vendido</span></div>
+          <div class="pinfo"><h4>Bolsas Kraft Premium</h4><p>Papel kraft 100% reciclado para retail y alimentos.</p><button class="pbtn">📋 Ver Cat&aacute;logo</button></div>
+        </div>
+        <div class="pcard">
+          <div class="pimg" style="background:linear-gradient(135deg,#A89060,#6B5F3A)">📦<span class="pbadge">Eco Premium</span></div>
+          <div class="pinfo"><h4>Cajas Cart&oacute;n Reciclado</h4><p>Cart&oacute;n 100% reciclado, armado sin pegamento.</p><button class="pbtn">📋 Ver Cat&aacute;logo</button></div>
+        </div>
+        <div class="pcard" id="cardFilm">
+          <div class="pimg" style="background:linear-gradient(135deg,#74C69D,#4A7C59)">🌽<span class="pbadge">Biodegradable</span></div>
+          <div class="pinfo"><h4>Film Compostable de Ma&iacute;z</h4><p>Film de almidon de maiz, cero residuos pl&aacute;sticos.</p><button class="pbtn">📋 Ver Cat&aacute;logo</button></div>
+        </div>
+        <div class="pcard">
+          <div class="pimg" style="background:linear-gradient(135deg,#52B788,#2D6A4F)">🛒<span class="pbadge">Org&aacute;nico</span></div>
+          <div class="pinfo"><h4>Bolsas Red de Algod&oacute;n</h4><p>Algod&oacute;n org&aacute;nico GOTS, 500+ usos posibles.</p><button class="pbtn">📋 Ver Cat&aacute;logo</button></div>
+        </div>
+        <div class="pcard">
+          <div class="pimg" style="background:linear-gradient(135deg,#E9C46A,#B5781C)">🌾<span class="pbadge">Apto Alimentos</span></div>
+          <div class="pinfo"><h4>Contenedores de Ca&ntilde;a</h4><p>Bagazo de ca&ntilde;a certificado FDA, apto microondas.</p><button class="pbtn">📋 Ver Cat&aacute;logo</button></div>
+        </div>
+        <div class="pcard">
+          <div class="pimg" style="background:linear-gradient(135deg,#48CAE4,#1D4E6F)">🫙<span class="pbadge">Reutilizable</span></div>
+          <div class="pinfo"><h4>Botellas de Vidrio</h4><p>Vidrio borosilicato, sin BPA, vida &uacute;til 20+ a&ntilde;os.</p><button class="pbtn">📋 Ver Cat&aacute;logo</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 3: MODAL CATALOGO -->
+    <div class="scene s-modal" id="sc3">
+      <div class="mini-nav" style="position:absolute; top:0; width:100%; z-index:5;">
+        <div class="mini-logo"><span>🌿</span> EcoEmpack</div>
+      </div>
+      <div class="modal-bg">
+        <div class="mini-modal">
+          <div class="modal-head" style="background:linear-gradient(135deg,#D4A373,#8B6914)">
+            <div class="me">🛍️</div>
+            <h3>Bolsas Kraft Premium</h3>
+            <p>Papel kraft 100% reciclado para retail y alimentos</p>
+          </div>
+          <div class="modal-tabs">
+            <div class="mtab active" id="mt-cat">📋 Cat&aacute;logo</div>
+            <div class="mtab" id="mt-uso">📖 Modo de Uso</div>
+            <div class="mtab" id="mt-eco">🌱 Impacto Eco</div>
+          </div>
+          <div class="modal-body" id="modal-content">
+            <div class="catalog-mini-grid">
+              <div class="ci"><div class="sz">Peque&ntilde;a 15x8x20</div><div class="pr">$0.45/u</div><div class="mn">Min. 100 pzas</div></div>
+              <div class="ci"><div class="sz">Mediana 25x12x30</div><div class="pr">$0.65/u</div><div class="mn">Min. 50 pzas</div></div>
+              <div class="ci"><div class="sz">Grande 35x15x40</div><div class="pr">$0.90/u</div><div class="mn">Min. 50 pzas</div></div>
+              <div class="ci"><div class="sz">Extra Grande</div><div class="pr">$1.20/u</div><div class="mn">Min. 30 pzas</div></div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;">
+              <span style="background:rgba(45,106,79,.08); color:#2D6A4F; font-size:.6rem; padding:2px 8px; border-radius:50px; font-weight:600;">FSC Certificado</span>
+              <span style="background:rgba(45,106,79,.08); color:#2D6A4F; font-size:.6rem; padding:2px 8px; border-radius:50px; font-weight:600;">Sin BPA</span>
+              <span style="background:rgba(45,106,79,.08); color:#2D6A4F; font-size:.6rem; padding:2px 8px; border-radius:50px; font-weight:600;">Compostable</span>
+              <span style="background:rgba(45,106,79,.08); color:#2D6A4F; font-size:.6rem; padding:2px 8px; border-radius:50px; font-weight:600;">Asas de algod&oacute;n</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 4: DETOX -->
+    <div class="scene s-detox" id="sc4">
+      <div class="detox-inner">
+        <div class="sec-h2-light">Detox de <span>Micropl&aacute;sticos</span></div>
+        <div class="sec-sub-light">&iquest;Por qu&eacute; necesitas protegerte? Los micropl&aacute;sticos ya est&aacute;n en tu sangre.</div>
+        <div class="detox-cards-mini">
+          <div class="dc">
+            <div class="di">⚠️</div>
+            <h4>El Problema</h4>
+            <p>Los micropl&aacute;sticos son fragmentos &lt;5mm que provienen de la degradaci&oacute;n del pl&aacute;stico.</p>
+            <ul>
+              <li>Detectados en sangre humana</li>
+              <li>Alteraci&oacute;n hormonal</li>
+              <li>Da&ntilde;o al sistema inmune</li>
+            </ul>
+          </div>
+          <div class="dc">
+            <div class="di">✅</div>
+            <h4>La Soluci&oacute;n</h4>
+            <p>Cambiar tus empaques es el primer y m&aacute;s importante paso del detox.</p>
+            <ul>
+              <li>Reemplaza envases pl&aacute;sticos</li>
+              <li>Filtra el agua</li>
+              <li>Usa bolsas de algod&oacute;n</li>
+            </ul>
+          </div>
+          <div class="dc">
+            <div class="di">💡</div>
+            <h4>Plan 30 D&iacute;as</h4>
+            <p>Reducci&oacute;n gradual de la exposici&oacute;n a micropl&aacute;sticos en un mes.</p>
+            <ul>
+              <li><b>Sem 1:</b> Botellas</li>
+              <li><b>Sem 2:</b> Envases</li>
+              <li><b>Sem 3:</b> Cocina</li>
+              <li><b>Sem 4:</b> Toda la casa</li>
+            </ul>
+          </div>
+        </div>
+        <div class="bars-wrap">
+          <h4>📊 Fuentes Principales de Exposici&oacute;n a Micropl&aacute;sticos</h4>
+          <div class="bar-row"><span class="bi">💧</span><span class="bn">Agua de la llave</span><div class="bt"><div class="bar-fill" style="width:90%"></div></div><span class="bp">90%</span></div>
+          <div class="bar-row"><span class="bi">🍱</span><span class="bn">Empaques alimentos</span><div class="bt"><div class="bar-fill" style="width:85%"></div></div><span class="bp">85%</span></div>
+          <div class="bar-row"><span class="bi">🍔</span><span class="bn">Alimentos procesados</span><div class="bt"><div class="bar-fill" style="width:75%"></div></div><span class="bp">75%</span></div>
+          <div class="bar-row"><span class="bi">🌬️</span><span class="bn">Aire interior</span><div class="bt"><div class="bar-fill" style="width:60%"></div></div><span class="bp">60%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 5: LOGIN -->
+    <div class="scene s-login" id="sc5">
+      <div class="login-brand-mini">
+        <div class="lb-logo"><span>🌿</span> EcoEmpack</div>
+        <div class="lb-content">
+          <h3>Bienvenido al Panel</h3>
+          <p>Gestiona el cat&aacute;logo completo desde un solo lugar con acceso seguro.</p>
+          <div class="lb-feat">📊 Gesti&oacute;n de Cat&aacute;logo</div>
+          <div class="lb-feat">👤 Administraci&oacute;n de Usuarios</div>
+          <div class="lb-feat">🔒 Acceso Seguro con JWT</div>
+        </div>
+        <div class="deco-c c1"></div><div class="deco-c c2"></div>
+      </div>
+      <div class="login-form-mini">
+        <div class="auth-tabs-mini">
+          <div class="at active">Iniciar Sesi&oacute;n</div>
+          <div class="at">Registrarse</div>
+        </div>
+        <div>
+          <div class="form-title">Iniciar Sesi&oacute;n</div>
+          <div class="form-sub">Ingresa tus credenciales para acceder</div>
+        </div>
+        <div class="fgroup">
+          <label>Correo Electr&oacute;nico</label>
+          <div class="input-w"><span class="ii">📧</span><input class="finput" type="text" value="admin@ecoempack.com" readonly></div>
+        </div>
+        <div class="fgroup">
+          <label>Contrase&ntilde;a</label>
+          <div class="input-w"><span class="ii">🔒</span><input class="finput" type="password" value="admin123" readonly></div>
+        </div>
+        <button class="btn-sub">Ingresar al Panel</button>
+        <div style="background:rgba(45,106,79,.06); border-radius:8px; padding:8px 10px; border:1px dashed rgba(45,106,79,.2);">
+          <p style="font-size:.62rem; color:#888;">💡 <b>Demo:</b> admin@ecoempack.com / admin123</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 6: BACKEND -->
+    <div class="scene s-backend" id="sc6">
+      <div class="struct-grid" style="padding:14px 18px;">
+        <div>
+          <div class="term-title">⚡ Terminal — Backend Node.js</div>
+          <div class="term">
+            <div class="tline"><span class="tp">$ </span><span class="tg">cd</span><span class="tw"> backend</span></div>
+            <div class="tline"><span class="tp">$ </span><span class="tg">npm install</span></div>
+            <div class="tline" style="color:#8b949e">added 142 packages in 4.2s</div>
+            <div class="tline"><span class="tp">$ </span><span class="tg">npm start</span></div>
+            <div class="tline"><span class="ty">&gt; node server.js</span></div>
+            <div class="tline"><span class="tg2">✅ Conectado a MongoDB correctamente</span></div>
+            <div class="tline"><span class="tg2">🚀 Servidor corriendo en http://localhost:3000</span></div>
+            <div class="tline"><span class="tw">📋 Endpoints disponibles:</span></div>
+            <div class="tline"><span class="tg">   GET  </span><span class="ty">http://localhost:3000/</span></div>
+            <div class="tline"><span class="tg">   POST </span><span class="ty">http://localhost:3000/api/auth/login</span></div>
+            <div class="tline"><span class="tg">   GET  </span><span class="ty">http://localhost:3000/api/products</span></div>
+          </div>
+          <div class="term-title" style="margin-top:6px;">🗂️ Variables de entorno (.env)</div>
+          <div class="term">
+            <div class="tline"><span class="ty">PORT</span><span class="tw">=</span><span class="tg2">3000</span></div>
+            <div class="tline"><span class="ty">MONGODB_URI</span><span class="tw">=</span><span class="tg">mongodb://localhost:27017/ecoempack</span></div>
+            <div class="tline"><span class="ty">JWT_SECRET</span><span class="tw">=</span><span class="tm">ecoempack_super_secreto_2024</span></div>
+            <div class="tline"><span class="ty">JWT_EXPIRES_IN</span><span class="tw">=</span><span class="tg2">7d</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="term-title">📁 Estructura del Proyecto</div>
+          <div class="term" style="font-size:.65rem; line-height:1.9;">
+            <div class="tline"><span class="dir">backend/</span></div>
+            <div class="tline">&nbsp;&nbsp;├─ <span style="color:#f78166">server.js</span> <span style="color:#8b949e">← punto de entrada</span></div>
+            <div class="tline">&nbsp;&nbsp;├─ <span style="color:#e3b341">package.json</span></div>
+            <div class="tline">&nbsp;&nbsp;├─ <span style="color:#e3b341">.env</span> <span style="color:#8b949e">← 🔒 NO subir a Git</span></div>
+            <div class="tline">&nbsp;&nbsp;├─ <span style="color:#a5d6ff">models/</span></div>
+            <div class="tline">&nbsp;&nbsp;│&nbsp;&nbsp;├─ <span style="color:#7ee787">User.js</span> <span style="color:#8b949e">← schema + bcrypt</span></div>
+            <div class="tline">&nbsp;&nbsp;│&nbsp;&nbsp;└─ <span style="color:#7ee787">Product.js</span></div>
+            <div class="tline">&nbsp;&nbsp;├─ <span style="color:#a5d6ff">routes/</span></div>
+            <div class="tline">&nbsp;&nbsp;│&nbsp;&nbsp;├─ <span style="color:#7ee787">auth.js</span> <span style="color:#8b949e">← login/register</span></div>
+            <div class="tline">&nbsp;&nbsp;│&nbsp;&nbsp;└─ <span style="color:#7ee787">products.js</span> <span style="color:#8b949e">← CRUD</span></div>
+            <div class="tline">&nbsp;&nbsp;└─ <span style="color:#a5d6ff">middleware/</span></div>
+            <div class="tline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ <span style="color:#7ee787">auth.js</span> <span style="color:#8b949e">← verifica JWT</span></div>
+            <div class="tline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ <span style="color:#7ee787">errorHandler.js</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 7: CRUD -->
+    <div class="scene s-crud" id="sc7">
+      <div class="req-panel">
+        <div class="panel-title">🔌 API Client — Peticiones HTTP</div>
+        <div class="crud-op active" id="op-get"><span class="method-badge GET">GET</span><span class="ep-url">/api/products</span><span class="ep-lock">🔓</span></div>
+        <div class="crud-op" id="op-login"><span class="method-badge POST">POST</span><span class="ep-url">/api/auth/login</span><span class="ep-lock">🔓</span></div>
+        <div class="crud-op" id="op-post"><span class="method-badge POST">POST</span><span class="ep-url">/api/products</span><span class="ep-lock">🔒</span></div>
+        <div class="crud-op" id="op-put"><span class="method-badge PUT">PUT</span><span class="ep-url">/api/products/:id</span><span class="ep-lock">🔒</span></div>
+        <div class="crud-op" id="op-del"><span class="method-badge DELETE">DELETE</span><span class="ep-url">/api/products/:id</span><span class="ep-lock">🔒</span></div>
+        <div class="req-detail" id="reqDetail">
+          <div class="req-label">HEADERS</div>
+          <div class="req-val">Content-Type: application/json</div>
+        </div>
+      </div>
+      <div class="res-panel">
+        <div class="panel-title">📨 Respuesta del Servidor</div>
+        <div class="res-code" id="resCode">
+<span class="rk">{</span><br>
+&nbsp;&nbsp;<span class="rk">"success"</span>: <span class="rb">true</span>,<br>
+&nbsp;&nbsp;<span class="rk">"count"</span>: <span class="rn">6</span>,<br>
+&nbsp;&nbsp;<span class="rk">"products"</span>: [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">{</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"_id"</span>: <span class="rs">"507f1f77..."</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"nombre"</span>: <span class="rs">"Bolsas Kraft"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"precio"</span>: <span class="rn">0.45</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"categoria"</span>: <span class="rs">"bolsas"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"biodegradable"</span>: <span class="rb">true</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"activo"</span>: <span class="rb">true</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">}</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="jc">/* ... 5 productos m&aacute;s */</span><br>
+&nbsp;&nbsp;]<br>
+<span class="rk">}</span>
+        </div>
+        <div style="margin-top:6px; display:flex; gap:6px; align-items:center;">
+          <span style="background:#2ea043; color:#fff; font-size:.62rem; padding:2px 8px; border-radius:4px; font-weight:700; font-family:monospace;">200 OK</span>
+          <span id="resStatus" style="color:#8b949e; font-family:monospace; font-size:.62rem;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 8: OUTRO -->
+    <div class="scene s-outro" id="sc8">
+      <div class="outro-icon">✅</div>
+      <div class="outro">
+        <h2>Proyecto Completado</h2>
+        <p>Aplicaci&oacute;n Full Stack funcional con frontend responsivo, API RESTful, autenticaci&oacute;n JWT y operaciones CRUD completas en MongoDB.</p>
+      </div>
+      <div class="arch-row">
+        <div class="arch-box">🖥️ Frontend</div>
+        <div class="arch-arr">⟶</div>
+        <div class="arch-box">⚡ Express API</div>
+        <div class="arch-arr">⟶</div>
+        <div class="arch-box">🍃 MongoDB</div>
+      </div>
+      <div class="outro-stack">
+        <span class="os">HTML + CSS + JS</span>
+        <span class="os">Node.js</span>
+        <span class="os">Express.js</span>
+        <span class="os">MongoDB + Mongoose</span>
+        <span class="os">JWT + bcrypt</span>
+        <span class="os">dotenv + CORS</span>
+      </div>
+    </div>
+
+  </div><!-- /stage -->
+</div><!-- /wrap -->
+
+<!-- Controls -->
+<div class="controls">
+  <div class="progress-row">
+    <div class="progress-bar" id="progBar" onclick="seekTo(event)">
+      <div class="progress-fill" id="progFill"></div>
+    </div>
+    <div class="time-display" id="timeDisp">0:00 / 2:30</div>
+  </div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn play-btn" id="playBtn" onclick="togglePlay()">⏸</button>
+    <button class="ctrl-btn" onclick="prevScene()">⏮</button>
+    <button class="ctrl-btn" onclick="nextScene()">⏭</button>
+    <span class="scene-label" id="sceneLabel">Intro</span>
+    <div class="scene-dots" id="sceneDots"></div>
+  </div>
+</div>
+
+<script>
+// ===== TIMELINE CONFIGURATION =====
+const TOTAL = 150; // seconds
+
+const scenes = [
+  { id:'sc0', label:'Intro',           start:0,   end:7,   url:'ecoempack.com' },
+  { id:'sc1', label:'P&aacute;gina Principal', start:7,   end:28,  url:'localhost:5500/frontend/index.html' },
+  { id:'sc2', label:'Cat&aacute;logo',         start:28,  end:50,  url:'localhost:5500/frontend/index.html#productos' },
+  { id:'sc3', label:'Modal Producto',  start:50,  end:70,  url:'localhost:5500/frontend/index.html#productos' },
+  { id:'sc4', label:'Secci&oacute;n Detox',   start:70,  end:88,  url:'localhost:5500/frontend/index.html#detox' },
+  { id:'sc5', label:'Login',           start:88,  end:103, url:'localhost:5500/frontend/login.html' },
+  { id:'sc6', label:'Backend',         start:103, end:122, url:'localhost:3000' },
+  { id:'sc7', label:'CRUD API',        start:122, end:143, url:'thunder-client://localhost:3000/api' },
+  { id:'sc8', label:'Cierre',          start:143, end:150, url:'ecoempack.com' }
+];
+
+// ===== ANNOTATIONS (time, text, top%, left%, optional: arrow side) =====
+const annotations = [
+  // Scene 1: Hero
+  { at:8,  text:'🔝 Navbar fija con scroll suave y CSS backdrop blur',                        top:'6%',  left:'38%' },
+  { at:11, text:'🎯 Sección Hero con animaciones CSS + tarjetas flotantes',                   top:'30%', left:'55%' },
+  { at:14, text:'📊 Estadísticas cargadas dinámicamente desde JS',                            top:'75%', left:'2%' },
+  { at:17, text:'♻️ Visual animado con keyframe @floatC en style.css',                        top:'40%', left:'58%' },
+
+  // Scene 2: Products
+  { at:29, text:'🗂️ Grid de 6 productos generado con catalog.js → renderProducts()',          top:'8%',  left:'50%' },
+  { at:33, text:'🃏 Cada tarjeta tiene gradiente CSS único y badge de categoría',             top:'30%', left:'1%' },
+  { at:37, text:'🖱️ Al hacer clic se ejecuta openModal(id) que inyecta HTML dinámico',        top:'65%', left:'35%' },
+  { at:41, text:'🏷️ Tags de certificación cargados desde el array products[] de catalog.js', top:'78%', left:'60%' },
+
+  // Scene 3: Modal
+  { at:51, text:'🪟 Modal con animación CSS scale + translateY desde opacity:0',              top:'5%',  left:'3%' },
+  { at:54, text:'📋 Tab CATÁLOGO: precios por talla, certificaciones y materiales',           top:'38%', left:'3%' },
+  { at:58, text:'📖 Tab MODO DE USO: 5 pasos generados desde product.uso[] en catalog.js',   top:'72%', left:'40%' },
+  { at:62, text:'🌱 Tab ECO: impacto ambiental en CO₂, agua y biodegradación',               top:'50%', left:'60%' },
+
+  // Scene 4: Detox
+  { at:71, text:'🌿 Sección sobre fondo verde oscuro con texto blanco y alta legibilidad',    top:'5%',  left:'35%' },
+  { at:74, text:'⚠️ 3 tarjetas informativas con glassmorphism: rgba(255,255,255,0.10)',       top:'42%', left:'1%' },
+  { at:78, text:'📊 Gráfico de barras CSS puro con porcentajes de exposición reales (OMS)',  top:'78%', left:'30%' },
+
+  // Scene 5: Login
+  { at:89, text:'🎨 Layout de 2 columnas: panel de marca a la izquierda, formulario a la derecha', top:'5%',  left:'22%' },
+  { at:93, text:'🔒 JWT: al hacer login el servidor devuelve un token que se guarda en localStorage', top:'60%', left:'52%' },
+  { at:97, text:'💡 Modo demo incluido: funciona sin backend corriendo para probar el flujo', top:'82%', left:'50%' },
+
+  // Scene 6: Backend
+  { at:104, text:'⚡ npm start conecta Express al puerto 3000 y MongoDB con Mongoose',        top:'5%',  left:'2%' },
+  { at:108, text:'🔐 .env almacena secretos: MONGODB_URI, JWT_SECRET. Nunca se sube a GitHub', top:'55%', left:'2%' },
+  { at:112, text:'📁 Arquitectura MVC: models/ + routes/ + middleware/ bien separados',       top:'18%', left:'52%' },
+  { at:117, text:'🛡️ middleware/auth.js verifica el JWT antes de cualquier ruta protegida',  top:'70%', left:'52%' },
+
+  // Scene 7: CRUD
+  { at:123, text:'📖 READ — GET /api/products es pública: cualquiera puede ver el catálogo', top:'5%',  left:'5%' },
+  { at:128, text:'🔑 CREATE/UPDATE/DELETE requieren JWT válido + rol admin en el header',     top:'32%', left:'5%' },
+  { at:133, text:'🗑️ DELETE usa soft delete: cambia activo:false en MongoDB, no borra el registro', top:'55%', left:'5%' },
+  { at:138, text:'✅ Respuestas siempre en JSON: { success, message, data }',                 top:'75%', left:'45%' },
+
+  // Scene 8: Outro
+  { at:144, text:'🎓 Proyecto Fase 1 completo: Frontend + Backend + BD + Auth', top:'10%', left:'25%' }
+];
+
+// CRUD scene data
+const crudOps = {
+  'op-get': {
+    header: 'HEADERS\nContent-Type: application/json',
+    response: `<span class="rk">{</span><br>
+&nbsp;&nbsp;<span class="rk">"success"</span>: <span class="rb">true</span>,<br>
+&nbsp;&nbsp;<span class="rk">"count"</span>: <span class="rn">6</span>,<br>
+&nbsp;&nbsp;<span class="rk">"products"</span>: [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="rk">"nombre"</span>: <span class="rs">"Bolsas Kraft"</span>, <span class="rk">"precio"</span>: <span class="rn">0.45</span> },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="jc">/* ... 5 más */</span><br>
+&nbsp;&nbsp;]<br>
+<span class="rk">}</span>`,
+    status: '200 OK  •  READ ✅'
+  },
+  'op-login': {
+    header: 'BODY (JSON)\n{\n  "email": "admin@ecoempack.com",\n  "password": "admin123"\n}',
+    response: `<span class="rk">{</span><br>
+&nbsp;&nbsp;<span class="rk">"success"</span>: <span class="rb">true</span>,<br>
+&nbsp;&nbsp;<span class="rk">"token"</span>: <span class="rs">"eyJhbGciOiJIUzI1NiJ9..."</span>,<br>
+&nbsp;&nbsp;<span class="rk">"user"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"nombre"</span>: <span class="rs">"Admin"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"rol"</span>: <span class="rs">"admin"</span><br>
+&nbsp;&nbsp;}<br>
+<span class="rk">}</span>`,
+    status: '200 OK  •  LOGIN ✅'
+  },
+  'op-post': {
+    header: 'HEADERS\nAuthorization: Bearer eyJhbGci...\n\nBODY\n{\n  "nombre": "Film Compostable",\n  "precio": 185,\n  "categoria": "film"\n}',
+    response: `<span class="rk">{</span><br>
+&nbsp;&nbsp;<span class="rk">"success"</span>: <span class="rb">true</span>,<br>
+&nbsp;&nbsp;<span class="rk">"message"</span>: <span class="rs">"Producto creado."</span>,<br>
+&nbsp;&nbsp;<span class="rk">"product"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"_id"</span>: <span class="rs">"64f3a9..."</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"nombre"</span>: <span class="rs">"Film Compostable"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"precio"</span>: <span class="rn">185</span><br>
+&nbsp;&nbsp;}<br>
+<span class="rk">}</span>`,
+    status: '201 Created  •  CREATE ✅'
+  },
+  'op-put': {
+    header: 'HEADERS\nAuthorization: Bearer eyJhbGci...\n\nBODY\n{\n  "precio": 200\n}',
+    response: `<span class="rk">{</span><br>
+&nbsp;&nbsp;<span class="rk">"success"</span>: <span class="rb">true</span>,<br>
+&nbsp;&nbsp;<span class="rk">"message"</span>: <span class="rs">"Producto actualizado."</span>,<br>
+&nbsp;&nbsp;<span class="rk">"product"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"_id"</span>: <span class="rs">"64f3a9..."</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rk">"precio"</span>: <span class="rn">200</span><br>
+&nbsp;&nbsp;}<br>
+<span class="rk">}</span>`,
+    status: '200 OK  •  UPDATE ✅'
+  },
+  'op-del': {
+    header: 'HEADERS\nAuthorization: Bearer eyJhbGci...',
+    response: `<span class="rk">{</span><br>
+&nbsp;&nbsp;<span class="rk">"success"</span>: <span class="rb">true</span>,<br>
+&nbsp;&nbsp;<span class="rk">"message"</span>: <span class="rs">"Producto eliminado."</span><br>
+&nbsp;&nbsp;<span class="jc">/* soft-delete: activo:false */</span><br>
+<span class="rk">}</span>`,
+    status: '200 OK  •  DELETE ✅'
+  }
+};
+
+// ===== STATE =====
+let elapsed  = 0;
+let playing  = true;
+let timer    = null;
+let activeAnnotations = [];
+
+// ===== INIT SCENE DOTS =====
+function initDots() {
+  const wrap = document.getElementById('sceneDots');
+  scenes.forEach((s,i) => {
+    const d = document.createElement('div');
+    d.className = 'sdot'; d.title = s.label;
+    d.onclick = () => seekToTime(s.start + 0.1);
+    wrap.appendChild(d);
+  });
+}
+
+// ===== UPDATE DISPLAY =====
+function updateDisplay(t) {
+  // Progress bar
+  document.getElementById('progFill').style.width = (t / TOTAL * 100) + '%';
+  // Time
+  const mm = Math.floor(t/60), ss = Math.floor(t%60).toString().padStart(2,'0');
+  const tm = Math.floor(TOTAL/60), ts = Math.floor(TOTAL%60).toString().padStart(2,'0');
+  document.getElementById('timeDisp').textContent = `${mm}:${ss} / ${tm}:${ts}`;
+
+  // Scene
+  const idx = scenes.findIndex(s => t >= s.start && t < s.end);
+  if (idx < 0) return;
+  const s = scenes[idx];
+
+  // Activate scene
+  document.querySelectorAll('.scene').forEach(el => el.classList.remove('active'));
+  document.getElementById(s.id).classList.add('active');
+
+  // URL bar
+  document.getElementById('urlBar').textContent = s.url;
+
+  // Label
+  document.getElementById('sceneLabel').innerHTML = s.label;
+
+  // Dots
+  document.querySelectorAll('.sdot').forEach((d,i) => {
+    d.classList.toggle('active', i === idx);
+  });
+
+  // Chapter bar
+  document.querySelectorAll('.chap').forEach((c,i) => {
+    c.classList.toggle('done', i < idx);
+    c.classList.toggle('current', i === idx);
+  });
+
+  // CRUD scene: cycle through ops
+  if (s.id === 'sc7') updateCrudOp(t - s.start);
+
+  // Modal tabs
+  if (s.id === 'sc3') updateModalTab(t - s.start);
+}
+
+// ===== CRUD OPS CYCLE =====
+function updateCrudOp(local) {
+  const opOrder = ['op-get','op-login','op-post','op-put','op-del'];
+  const idx = Math.min(Math.floor(local / 4.2), 4);
+  opOrder.forEach((id,i) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i === idx);
+  });
+  const key = opOrder[idx];
+  const data = crudOps[key];
+  if (!data) return;
+  document.getElementById('reqDetail').innerHTML =
+    `<div class="req-label">REQUEST DETAILS</div><div class="req-val" style="white-space:pre; font-size:.6rem;">${data.header}</div>`;
+  document.getElementById('resCode').innerHTML = data.response;
+  document.getElementById('resStatus').textContent = data.status;
+}
+
+// ===== MODAL TABS =====
+const modalContents = {
+  cat: `<div class="catalog-mini-grid">
+    <div class="ci"><div class="sz">Peq 15x8x20</div><div class="pr">$0.45/u</div><div class="mn">Min 100 pzas</div></div>
+    <div class="ci"><div class="sz">Med 25x12x30</div><div class="pr">$0.65/u</div><div class="mn">Min 50 pzas</div></div>
+    <div class="ci"><div class="sz">Grande</div><div class="pr">$0.90/u</div><div class="mn">Min 50 pzas</div></div>
+    <div class="ci"><div class="sz">XL</div><div class="pr">$1.20/u</div><div class="mn">Min 30 pzas</div></div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:4px;">
+    <span style="background:rgba(45,106,79,.08);color:#2D6A4F;font-size:.6rem;padding:2px 8px;border-radius:50px;font-weight:600;">FSC Cert</span>
+    <span style="background:rgba(45,106,79,.08);color:#2D6A4F;font-size:.6rem;padding:2px 8px;border-radius:50px;font-weight:600;">Sin BPA</span>
+    <span style="background:rgba(45,106,79,.08);color:#2D6A4F;font-size:.6rem;padding:2px 8px;border-radius:50px;font-weight:600;">Compostable</span>
+  </div>`,
+  uso: `<div class="uso-steps-mini">
+    <div class="us"><span class="ico">1️⃣</span><div><h5>Apertura</h5><p>Jala las asas hacia afuera para abrir la bolsa suavemente.</p></div></div>
+    <div class="us"><span class="ico">2️⃣</span><div><h5>Carga</h5><p>Max. 2kg (peq.) o 5kg (mediana). No sobrecargar.</p></div></div>
+    <div class="us"><span class="ico">3️⃣</span><div><h5>Cierre</h5><p>Dobla la parte superior 2-3 veces hacia afuera.</p></div></div>
+    <div class="us"><span class="ico">4️⃣</span><div><h5>Reutiliza</h5><p>Hasta 5 usos si se mantiene seca y sin humedad.</p></div></div>
+    <div class="us"><span class="ico">5️⃣</span><div><h5>Compostar</h5><p>Se biodegrada en 2-6 semanas en compostera.</p></div></div>
+  </div>`,
+  eco: `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+    <div class="ci"><div class="sz" style="color:#2D6A4F;">💨 CO₂</div><p style="font-size:.65rem;color:#444;">85% menos vs bolsa plástica</p></div>
+    <div class="ci"><div class="sz" style="color:#2D6A4F;">🌿 Bio</div><p style="font-size:.65rem;color:#444;">2-6 semanas en compostera</p></div>
+    <div class="ci"><div class="sz" style="color:#2D6A4F;">💧 Agua</div><p style="font-size:.65rem;color:#444;">75% menos en producción</p></div>
+    <div class="ci"><div class="sz" style="color:#2D6A4F;">♻️ Ciclo</div><p style="font-size:.65rem;color:#444;">Economía circular</p></div>
+  </div>
+  <div style="background:rgba(45,106,79,.06);border-radius:6px;padding:8px;border-left:3px solid #52B788;font-size:.65rem;font-style:italic;color:#1B4332;">
+    💡 <b>Dato Eco:</b> Reemplazar 1 bolsa plástica = salvar 1L de agua marina
+  </div>`
+};
+
+function updateModalTab(local) {
+  const tabs = ['cat','uso','eco'];
+  const idx  = Math.min(Math.floor(local / 6.5), 2);
+  ['mt-cat','mt-uso','mt-eco'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i === idx);
+  });
+  const mc = document.getElementById('modal-content');
+  if (mc) mc.innerHTML = modalContents[tabs[idx]];
+}
+
+// ===== ANNOTATIONS =====
+function clearAnnotations() {
+  document.querySelectorAll('.callout, .hbox').forEach(el => el.remove());
+  activeAnnotations = [];
+}
+
+function showAnnotation(ann) {
+  const stage = document.getElementById('stage');
+  const el    = document.createElement('div');
+  el.className = 'callout';
+  el.innerHTML = ann.text;
+  el.style.top  = ann.top;
+  el.style.left = ann.left;
+  stage.appendChild(el);
+  activeAnnotations.push({ el, ann });
+  // Remove after 5 seconds
+  setTimeout(() => {
+    el.classList.add('fade-out');
+    setTimeout(() => el.remove(), 320);
+  }, 5000);
+}
+
+// ===== MAIN TICK =====
+let lastAnnotionCheck = -1;
+function tick() {
+  if (!playing) return;
+  elapsed += 0.5;
+  if (elapsed >= TOTAL) { elapsed = TOTAL; playing = false; document.getElementById('playBtn').textContent = '▶'; }
+  updateDisplay(elapsed);
+
+  // Fire annotations
+  annotations.forEach(ann => {
+    if (Math.abs(elapsed - ann.at) < 0.3 && lastAnnotionCheck !== ann.at) {
+      lastAnnotionCheck = ann.at;
+      showAnnotation(ann);
+    }
+  });
+}
+
+// ===== CONTROLS =====
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('playBtn').textContent = playing ? '⏸' : '▶';
+  if (playing && elapsed >= TOTAL) { elapsed = 0; clearAnnotations(); }
+}
+function nextScene() {
+  const idx = scenes.findIndex(s => elapsed >= s.start && elapsed < s.end);
+  if (idx < scenes.length - 1) seekToTime(scenes[idx+1].start + 0.1);
+}
+function prevScene() {
+  const idx = scenes.findIndex(s => elapsed >= s.start && elapsed < s.end);
+  if (idx > 0) seekToTime(scenes[idx-1].start + 0.1);
+}
+function seekToTime(t) {
+  elapsed = Math.max(0, Math.min(TOTAL, t));
+  clearAnnotations();
+  lastAnnotionCheck = -1;
+  updateDisplay(elapsed);
+}
+function seekTo(e) {
+  const bar  = document.getElementById('progBar');
+  const rect = bar.getBoundingClientRect();
+  const pct  = (e.clientX - rect.left) / rect.width;
+  seekToTime(pct * TOTAL);
+}
+
+// ===== SETUP CHAPTER BAR =====
+function initChapBar() {
+  const bar = document.getElementById('chapBar');
+  scenes.forEach((s, i) => {
+    const w = ((s.end - s.start) / TOTAL * 100).toFixed(1);
+    const c = document.createElement('div');
+    c.className = 'chap' + (i === 0 ? ' current' : '');
+    c.style.width = w + '%';
+    c.title = s.label;
+    c.onclick = () => seekToTime(s.start + 0.1);
+    bar.appendChild(c);
+  });
+}
+
+// ===== BOOT =====
+initDots();
+initChapBar();
+updateDisplay(0);
+timer = setInterval(tick, 500);
+</script>
+</body>
+</html>
